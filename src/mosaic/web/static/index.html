@@ -42,7 +42,8 @@
   button { margin-top:16px; width:100%; padding:11px; border:0; border-radius:8px; background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; position:relative; overflow:hidden }
   button:disabled { cursor:default; opacity:.85 }
   button .bar { position:absolute; left:0; top:0; bottom:0; width:0; background:#fff3; transition:width .3s }
-  .status { font-size:12px; color:var(--muted); margin-top:8px; min-height:16px; display:flex; justify-content:space-between }
+  .status { font-size:12px; color:var(--muted); margin-top:8px; min-height:16px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:2px 12px }
+  .status span { white-space:nowrap }
   a.dl { color:var(--accent); text-decoration:none; font-weight:500 }
 
   /* ---- viewer ---- */
@@ -50,6 +51,13 @@
   .empty { border:1.5px dashed var(--line); border-radius:12px; width:100%; height:100%; min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--muted); gap:8px; cursor:pointer }
   .empty:hover, .empty.over { border-color:var(--accent) }
   .empty strong { color:var(--fg); font-weight:500; font-size:15px }
+  .examples { margin-top:22px; display:flex; flex-direction:column; align-items:center; gap:8px }
+  .examples small { color:var(--muted) }
+  .examples .row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center }
+  .examples img { width:84px; height:84px; object-fit:cover; border-radius:8px; border:2px solid transparent; transition:transform .12s, border-color .12s; box-shadow:var(--shadow) }
+  .examples img:hover { transform:scale(1.06); border-color:var(--accent) }
+  .examples .credit { font-size:11px; color:var(--muted) }
+  .examples .credit a { color:inherit }
   .stage { position:relative; max-width:100%; max-height:100%; border-radius:10px; overflow:hidden; box-shadow:var(--shadow); background:#8882; user-select:none; -webkit-user-select:none; touch-action:none; cursor:ew-resize }
   .stage.single { cursor:default }
   .stage img { display:block; max-width:100%; max-height:calc(100vh - 110px); width:auto; height:auto; pointer-events:none; -webkit-user-drag:none; user-drag:none }
@@ -124,7 +132,19 @@
   </aside>
 
   <section class="viewer" id="viewer">
-    <div class="empty" id="empty"><strong>Drop an image here</strong><span>or paste one, or click to choose</span></div>
+    <div class="empty" id="empty"><strong>Drop an image here</strong><span>or paste one, or click to choose</span>
+      <div class="examples" id="examples">
+        <small>or try one of these</small>
+        <div class="row">
+          <img src="/examples/thumbs/mona-lisa.jpg" data-src="/examples/mona-lisa.jpg" alt="Mona Lisa" title="Leonardo da Vinci, Mona Lisa">
+          <img src="/examples/thumbs/pearl-earring.jpg" data-src="/examples/pearl-earring.jpg" alt="Girl with a Pearl Earring" title="Vermeer, Girl with a Pearl Earring">
+          <img src="/examples/thumbs/starry-night.jpg" data-src="/examples/starry-night.jpg" alt="The Starry Night" title="Van Gogh, The Starry Night">
+          <img src="/examples/thumbs/great-wave.jpg" data-src="/examples/great-wave.jpg" alt="The Great Wave off Kanagawa" title="Hokusai, The Great Wave off Kanagawa">
+          <img src="/examples/thumbs/astronaut.jpg" data-src="/examples/astronaut.jpg" alt="Astronaut" title="Eileen Collins, NASA portrait">
+        </div>
+        <span class="credit">public domain images via <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> and NASA</span>
+      </div>
+    </div>
     <div class="stage single" id="stage" hidden>
       <img id="out" alt="mosaic" draggable="false">
       <img id="orig" class="orig" alt="original" draggable="false">
@@ -157,7 +177,15 @@
   }
   const pick = () => file.click();
   $('drop').addEventListener('click', pick);
-  $('empty').addEventListener('click', pick);
+  $('empty').addEventListener('click', e => { if (!e.target.closest('.examples')) pick(); });
+  $('examples').addEventListener('click', async e => {
+    const img = e.target.closest('img[data-src]'); if (!img) return;
+    e.stopPropagation();
+    try {
+      const blob = await (await fetch(img.dataset.src)).blob();
+      setFile(new File([blob], img.dataset.src.split('/').pop(), { type: blob.type || 'image/jpeg' }));
+    } catch (err) { status.textContent = 'could not load example'; }
+  });
   file.addEventListener('change', () => setFile(file.files[0]));
   for (const el of [$('drop'), $('empty'), $('viewer')]) {
     el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });

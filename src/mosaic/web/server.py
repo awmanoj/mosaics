@@ -14,6 +14,7 @@ from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, Response
+from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
 from ..params import MosaicParams
@@ -24,6 +25,7 @@ STATIC = Path(__file__).parent / "static"
 MAX_UPLOAD = 20 * 1024 * 1024
 _lock = asyncio.Semaphore(2)  # the engine is CPU bound; don't let many jobs run at once
 _ALPHABET = string.ascii_lowercase + string.digits
+app.mount("/examples", StaticFiles(directory=STATIC / "examples"), name="examples")
 
 
 def _code(n: int = 6) -> str:
