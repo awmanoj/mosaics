@@ -1,7 +1,8 @@
 # mosaic — Simulating Decorative Mosaics
 
-A CPU implementation of Alejo Hausner's *Simulating Decorative Mosaics* (SIGGRAPH 2001),
-packaged as a Python library with a command-line front end. A small web front end is planned on
+A CPU implementation of Alejo Hausner's *Simulating Decorative Mosaics* (SIGGRAPH 2001,
+[doi:10.1145/383259.383327](https://doi.org/10.1145/383259.383327)), packaged as a Python
+library with a command-line front end. A small web front end is planned on
 top of the same `make_mosaic()` API.
 
 ## The algorithm (what the paper does, and what this code does)
