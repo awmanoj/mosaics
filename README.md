@@ -118,4 +118,11 @@ docker compose up -d
 
 The container listens on `0.0.0.0:8765`; put a reverse proxy with TLS in front of it on a public
 server. Set `MOSAIC_PORT` to change the port inside the container.
+
+Environment variables:
+
+| variable | effect |
+|---|---|
+| `MOSAIC_HOST`, `MOSAIC_PORT` | bind address (defaults `127.0.0.1:8765`; the image sets `0.0.0.0`) |
+| `GA_MEASUREMENT_ID` | when set (e.g. `G-XXXXXXXXXX`), the Google Analytics gtag snippet is injected into the page; unset means no tracking |
 # mosaics

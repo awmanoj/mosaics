@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import io
+import os
+import re
 import secrets
 import string
 from pathlib import Path
@@ -33,9 +36,27 @@ def _hex(s: str) -> tuple[int, int, int]:
     return tuple(int(s[i : i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
 
 
+_GA_SNIPPET = """<script async src="https://www.googletagmanager.com/gtag/js?id={id}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', '{id}');
+</script>"""
+
+
+def _ga_tag() -> str:
+    """Google Analytics snippet for GA_MEASUREMENT_ID (e.g. G-XXXXXXXXXX), or '' when unset."""
+    gid = os.environ.get("GA_MEASUREMENT_ID", "").strip()
+    if not gid or not re.fullmatch(r"[A-Za-z0-9-]+", gid):
+        return ""
+    return _GA_SNIPPET.format(id=html.escape(gid))
+
+
 @app.get("/")
 async def index() -> HTMLResponse:
-    return HTMLResponse((STATIC / "index.html").read_text(), headers={"Cache-Control": "no-store"})
+    page = (STATIC / "index.html").read_text().replace("<!--GA-->", _ga_tag(), 1)
+    return HTMLResponse(page, headers={"Cache-Control": "no-store"})
 
 
 @app.post("/mosaic")
